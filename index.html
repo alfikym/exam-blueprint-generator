@@ -44,9 +44,11 @@
             padding: 10px;
             border: 1px solid #ccc;
         }
-        .description {
-            font-size: 12px;
+        small {
+            display: block;
             color: #555;
+            font-size: 12px;
+            margin-top: -5px;
             margin-bottom: 10px;
         }
         .error {
@@ -59,7 +61,6 @@
 
 <body>
 
-    <!-- Arabic Title and Description -->
     <h2 style="font-weight: bold; color: #333;">نموذج لتوزيع درجات الامتحان على مواضيع المقرر بناءً على الوزن النسبي لهذه المواضيع</h2>
     <p style="font-size: 14px; color: #555; width: 70%; margin: 0 auto;">
         يعتمد هذا النموذج على الوقت الذي تم تخصيصه لتدريس كل فصل مع الأهمية النسبية له، وذلك لتحديد وزن فعّال لكل فصل يُستخدم في توزيع درجات الاختبار بشكل عادل ومتوازن.
@@ -71,18 +72,18 @@
         <!-- 1. Number of Chapters -->
         <label>Number of Chapters:</label><br>
         <input type="number" id="chapterCount" min="1" required><br>
-        <div class="description">*Enter the total number of chapters or topics to be included in the exam.*</div>
+        <small>*Enter the total number of chapters or topics to be included in the exam.*</small>
 
         <!-- 6. Generate Inputs Button -->
         <button type="button" onclick="generateInputs()">Generate Inputs</button>
-        <div class="description">*Click to create input fields for each chapter based on the number you entered.*</div>
+        <small>*Click to create input fields for each chapter based on the number you entered.*</small>
 
         <div id="inputs"></div>
 
         <!-- 5. Total Exam Marks -->
         <label>Total Exam Marks:</label><br>
         <input type="number" id="totalMarks" min="1" required><br>
-        <div class="description">*Enter the total marks allocated for the entire exam (e.g., 100 or 50).*</div>
+        <small>*Enter the total marks allocated for the entire exam (e.g., 100 or 50).*</small>
 
         <button type="button" onclick="generateBlueprint()">Generate Blueprint</button>
     </form>
@@ -102,18 +103,17 @@
             for (let i = 1; i <= count; i++) {
                 inputsDiv.innerHTML += `
                     <h3>Chapter ${i}</h3>
-
-                    <!-- 2. Chapter Title -->
+                    <label>Chapter Title:</label><br>
                     <input type="text" placeholder="Chapter Title" id="title${i}" required><br>
-                    <div class="description">*Provide the name or main topic of this chapter.*</div>
+                    <small>*Provide the name or main topic of this chapter.*</small>
 
-                    <!-- 3. Time Spent (hrs) -->
+                    <label>Time Spent (hrs):</label><br>
                     <input type="number" placeholder="Time Spent (hrs)" id="time${i}" min="1" required><br>
-                    <div class="description">*Enter the total hours spent covering this chapter in lectures.*</div>
+                    <small>*Enter the total hours spent covering this chapter in lectures.*</small>
 
-                    <!-- 4. Importance Weight (%) -->
+                    <label>Importance Weight (%):</label><br>
                     <input type="number" placeholder="Importance Weight (%)" id="importance${i}" min="1" max="100" required><br>
-                    <div class="description">*Assign a percentage for the chapter's exam importance (total must be 100%).*</div>
+                    <small>*Assign a percentage for the chapter's exam importance (total must be 100%).*</small>
                 `;
             }
         }
