@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exam Blueprint Generator</title>
@@ -42,6 +43,8 @@
     </form>
 
     <div id="result"></div>
+    
+<button onclick="downloadPDF()">Download as PDF</button>
 
     <script>
         function generateInputs() {
@@ -107,6 +110,29 @@
             resultHTML += `</table>`;
             document.getElementById('result').innerHTML = resultHTML;
         }
+            function downloadPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // Add title to the PDF
+        doc.setFontSize(18);
+        doc.text('Exam Blueprint', 10, 10);
+
+        const resultDiv = document.getElementById('result');
+        if (!resultDiv.innerHTML) {
+            alert('Please generate the blueprint first!');
+            return;
+        }
+
+        // Convert HTML to PDF
+        doc.html(resultDiv, {
+            callback: function (doc) {
+                doc.save('Exam_Blueprint.pdf');
+            },
+            x: 10,
+            y: 20,
+        });
+    }
     </script>
 
 </body>
