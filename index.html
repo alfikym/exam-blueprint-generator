@@ -1,10 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exam Blueprint Generator</title>
+
+    <!-- ✅ Bootstrap for Styling (Optional but Recommended) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- ✅ jsPDF Library for PDF Download -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- ✅ Optional: html2canvas for better table rendering in PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -28,6 +37,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <h1>Exam Blueprint Generator</h1>
@@ -35,18 +45,22 @@
     <form id="blueprintForm">
         <label>Number of Chapters: </label>
         <input type="number" id="chapterCount" min="1" required><br>
-        <button type="button" onclick="generateInputs()">Generate Inputs</button>
+        <button type="button" class="btn btn-primary" onclick="generateInputs()">Generate Inputs</button>
         <div id="inputs"></div>
         <label>Total Exam Marks: </label>
         <input type="number" id="totalMarks" required><br>
-        <button type="button" onclick="generateBlueprint()">Generate Blueprint</button>
+        <button type="button" class="btn btn-success" onclick="generateBlueprint()">Generate Blueprint</button>
     </form>
 
+    <!-- ✅ Blueprint Result Section -->
     <div id="result"></div>
-    
-<button onclick="downloadPDF()">Download as PDF</button>
 
+    <!-- ✅ PDF Download Button -->
+    <button class="btn btn-warning" onclick="downloadPDF()">Download as PDF</button>
+
+    <!-- ✅ JavaScript for Functionality -->
     <script>
+        // ✅ Function to Generate Input Fields Based on Chapter Count
         function generateInputs() {
             const count = document.getElementById('chapterCount').value;
             const inputsDiv = document.getElementById('inputs');
@@ -62,6 +76,7 @@
             }
         }
 
+        // ✅ Function to Generate the Blueprint Table
         function generateBlueprint() {
             const count = document.getElementById('chapterCount').value;
             const totalMarks = document.getElementById('totalMarks').value;
@@ -83,7 +98,7 @@
             }
 
             let resultHTML = `<h2>Generated Exam Blueprint</h2>
-            <table>
+            <table class="table table-bordered">
                 <tr>
                     <th>Chapter</th>
                     <th>Time Weight (%)</th>
@@ -110,29 +125,25 @@
             resultHTML += `</table>`;
             document.getElementById('result').innerHTML = resultHTML;
         }
-            function downloadPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
 
-        // Add title to the PDF
-        doc.setFontSize(18);
-        doc.text('Exam Blueprint', 10, 10);
+        // ✅ Function to Download the Blueprint as PDF
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
 
-        const resultDiv = document.getElementById('result');
-        if (!resultDiv.innerHTML) {
-            alert('Please generate the blueprint first!');
-            return;
-        }
+            const resultDiv = document.getElementById('result');
+            if (!resultDiv.innerHTML.trim()) {
+                alert('Please generate the blueprint first!');
+                return;
+            }
 
-        // Convert HTML to PDF
-        doc.html(resultDiv, {
-            callback: function (doc) {
+            // Use html2canvas to capture the blueprint as an image for the PDF
+            html2canvas(resultDiv).then(function(canvas) {
+                const imgData = canvas.toDataURL('image/png');
+                doc.addImage(imgData, 'PNG', 10, 10, 190, 0);
                 doc.save('Exam_Blueprint.pdf');
-            },
-            x: 10,
-            y: 20,
-        });
-    }
+            });
+        }
     </script>
 
 </body>
