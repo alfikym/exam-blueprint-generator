@@ -44,6 +44,11 @@
             padding: 10px;
             border: 1px solid #ccc;
         }
+        .description {
+            font-size: 12px;
+            color: #555;
+            margin-bottom: 10px;
+        }
         .error {
             color: red;
             font-size: 14px;
@@ -63,17 +68,22 @@
     <h1>Exam Blueprint Generator</h1>
 
     <form id="blueprintForm">
+        <!-- 1. Number of Chapters -->
         <label>Number of Chapters:</label><br>
         <input type="number" id="chapterCount" min="1" required><br>
+        <div class="description">*Enter the total number of chapters or topics to be included in the exam.*</div>
 
+        <!-- 6. Generate Inputs Button -->
         <button type="button" onclick="generateInputs()">Generate Inputs</button>
-        
+        <div class="description">*Click to create input fields for each chapter based on the number you entered.*</div>
+
         <div id="inputs"></div>
 
+        <!-- 5. Total Exam Marks -->
         <label>Total Exam Marks:</label><br>
         <input type="number" id="totalMarks" min="1" required><br>
+        <div class="description">*Enter the total marks allocated for the entire exam (e.g., 100 or 50).*</div>
 
-        <!-- ✅ Corrected Generate Blueprint Button -->
         <button type="button" onclick="generateBlueprint()">Generate Blueprint</button>
     </form>
 
@@ -92,26 +102,34 @@
             for (let i = 1; i <= count; i++) {
                 inputsDiv.innerHTML += `
                     <h3>Chapter ${i}</h3>
+
+                    <!-- 2. Chapter Title -->
                     <input type="text" placeholder="Chapter Title" id="title${i}" required><br>
+                    <div class="description">*Provide the name or main topic of this chapter.*</div>
+
+                    <!-- 3. Time Spent (hrs) -->
                     <input type="number" placeholder="Time Spent (hrs)" id="time${i}" min="1" required><br>
+                    <div class="description">*Enter the total hours spent covering this chapter in lectures.*</div>
+
+                    <!-- 4. Importance Weight (%) -->
                     <input type="number" placeholder="Importance Weight (%)" id="importance${i}" min="1" max="100" required><br>
+                    <div class="description">*Assign a percentage for the chapter's exam importance (total must be 100%).*</div>
                 `;
             }
         }
 
-        // ✅ Corrected Generate Blueprint Function
-        function generateBlueprint() {
-            const count = document.getElementById('chapterCount').value;
-            const totalMarks = document.getElementById('totalMarks').value;
-
-            if (count < 1 || totalMarks <= 0) {
-                alert("Please enter valid chapter count and total marks.");
-                return;
+        function validateInputs(count, totalMarks) {
+            if (count < 1) {
+                showError("Please enter a valid number of chapters (1 or more).");
+                return false;
             }
 
-            let totalTime = 0;
+            if (totalMarks <= 0) {
+                showError("Total exam marks must be a positive number.");
+                return false;
+            }
+
             let totalImportance = 0;
-            const chapters = [];
 
             for (let i = 1; i <= count; i++) {
                 const title = document.getElementById(`title${i}`).value.trim();
@@ -119,47 +137,28 @@
                 const importance = parseFloat(document.getElementById(`importance${i}`).value);
 
                 if (!title || isNaN(time) || isNaN(importance)) {
-                    alert(`Please complete all fields for Chapter ${i}.`);
-                    return;
+                    showError(`Please complete all fields for Chapter ${i}.`);
+                    return false;
                 }
 
-                totalTime += time;
                 totalImportance += importance;
-                chapters.push({ title, time, importance });
             }
 
             if (totalImportance !== 100) {
-                alert(`Total importance weight must be 100%. Currently: ${totalImportance}%`);
-                return;
+                showError(`The total importance weight must add up to 100%. Currently: ${totalImportance}%.`);
+                return false;
             }
 
-            let resultHTML = `<h2>Generated Exam Blueprint</h2>
-            <table>
-                <tr>
-                    <th>Chapter</th>
-                    <th>Time Weight (%)</th>
-                    <th>Importance Weight (%)</th>
-                    <th>Final Weight (%)</th>
-                    <th>Marks Allocated</th>
-                </tr>`;
+            clearError();
+            return true;
+        }
 
-            chapters.forEach(chapter => {
-                const timeWeight = (chapter.time / totalTime) * 100;
-                const finalWeight = (timeWeight + chapter.importance) / 2;
-                const marks = ((finalWeight / 100) * totalMarks).toFixed(2);
+        function showError(message) {
+            document.getElementById('errorMessage').innerText = message;
+        }
 
-                resultHTML += `
-                    <tr>
-                        <td>${chapter.title}</td>
-                        <td>${timeWeight.toFixed(2)}%</td>
-                        <td>${chapter.importance}%</td>
-                        <td>${finalWeight.toFixed(2)}%</td>
-                        <td>${marks}</td>
-                    </tr>`;
-            });
-
-            resultHTML += `</table>`;
-            document.getElementById('result').innerHTML = resultHTML;
+        function clearError() {
+            document.getElementById('errorMessage').innerText = "";
         }
 
         function downloadPDF() {
