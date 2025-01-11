@@ -200,22 +200,49 @@
         }
 
         // ✅ Download the blueprint as a PDF
-        function downloadPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+       function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'mm', 'a4');
 
-            const resultDiv = document.getElementById('result');
-            if (!resultDiv.innerHTML.trim()) {
-                alert('Please generate the blueprint first!');
-                return;
-            }
+    const resultDiv = document.getElementById('result');
+    if (!resultDiv.innerHTML.trim()) {
+        alert('Please generate the blueprint first!');
+        return;
+    }
 
-            html2canvas(resultDiv).then(function(canvas) {
-                const imgData = canvas.toDataURL('image/png');
-                doc.addImage(imgData, 'PNG', 10, 10, 190, 0);
-                doc.save('Exam_Blueprint.pdf');
-            });
+    // ✅ Header Section
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Exam Blueprint', 105, 20, { align: 'center' });
+
+    // ✅ Subheader (Date or Institution)
+    const today = new Date().toLocaleDateString();
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Generated on: ${today}`, 105, 28, { align: 'center' });
+
+    // ✅ Optional Logo (Add your logo URL)
+    const logoUrl = 'https://via.placeholder.com/80'; // Replace with your logo URL
+    doc.addImage(logoUrl, 'PNG', 15, 10, 20, 20); // Position: (x, y, width, height)
+
+    // ✅ Convert the Table to PDF
+    html2canvas(resultDiv).then(function (canvas) {
+        const imgData = canvas.toDataURL('image/png');
+        doc.addImage(imgData, 'PNG', 10, 40, 190, 0);
+
+        // ✅ Footer with Page Number
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(10);
+            doc.text(`Page ${i} of ${pageCount}`, 105, 290, { align: 'center' });
         }
+
+        // ✅ Save the PDF
+        doc.save('Custom_Exam_Blueprint.pdf');
+    });
+}
+
     </script>
 
 </body>
