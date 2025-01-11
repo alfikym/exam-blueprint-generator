@@ -11,44 +11,45 @@
     <!-- ✅ html2canvas for table-to-PDF conversion -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #f4f4f9;
-        text-align: center;
-        padding: 20px;
-    }
-    input, button {
-        padding: 10px;
-        margin: 5px;
-        width: 250px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        font-size: 16px;
-    }
-    /* ✅ Light Grey Button Style */
-    button {
-        background-color: #e0e0e0; /* Light Grey */
-        color: #333; /* Darker text for contrast */
-        cursor: pointer;
-        border: 1px solid #bbb; /* Soft border for depth */
-        transition: background-color 0.3s ease, color 0.3s ease;
-    }
-    button:hover {
-        background-color: #d6d6d6; /* Slightly darker grey on hover */
-        color: #000; /* Darker text for contrast */
-    }
-    table {
-        width: 80%;
-        margin: 20px auto;
-        border-collapse: collapse;
-    }
-    th, td {
-        padding: 10px;
-        border: 1px solid #ccc;
-    }
-</style>
-
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            text-align: center;
+            padding: 20px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            width: 250px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #e0e0e0; /* Light Grey */
+            color: #333;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        button:hover {
+            background-color: #d6d6d6; /* Slightly darker grey */
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 
 <body>
@@ -61,9 +62,12 @@
         <button type="button" onclick="generateInputs()">Generate Inputs</button>
         <div id="inputs"></div>
         <label>Total Exam Marks: </label>
-        <input type="number" id="totalMarks" required><br>
+        <input type="number" id="totalMarks" min="1" required><br>
         <button type="button" onclick="generateBlueprint()">Generate Blueprint</button>
     </form>
+
+    <!-- ✅ Error Message Area -->
+    <div id="errorMessage" class="error"></div>
 
     <div id="result"></div>
 
@@ -86,10 +90,58 @@
             }
         }
 
+        // ✅ Input Validation Function
+        function validateInputs(count, totalMarks) {
+            if (count < 1) {
+                showError("Please enter a valid number of chapters (1 or more).");
+                return false;
+            }
+
+            if (totalMarks <= 0) {
+                showError("Total exam marks must be a positive number.");
+                return false;
+            }
+
+            for (let i = 1; i <= count; i++) {
+                const title = document.getElementById(`title${i}`).value.trim();
+                const time = parseFloat(document.getElementById(`time${i}`).value);
+                const importance = parseFloat(document.getElementById(`importance${i}`).value);
+
+                if (!title) {
+                    showError(`Chapter ${i} title cannot be empty.`);
+                    return false;
+                }
+                if (isNaN(time) || time <= 0) {
+                    showError(`Time spent for Chapter ${i} must be a positive number.`);
+                    return false;
+                }
+                if (isNaN(importance) || importance < 1 || importance > 100) {
+                    showError(`Importance weight for Chapter ${i} must be between 1 and 100.`);
+                    return false;
+                }
+            }
+            clearError();
+            return true;
+        }
+
+        // ✅ Function to Show Error Messages
+        function showError(message) {
+            document.getElementById('errorMessage').innerText = message;
+        }
+
+        // ✅ Clear Error Messages
+        function clearError() {
+            document.getElementById('errorMessage').innerText = "";
+        }
+
         // ✅ Generate the exam blueprint
         function generateBlueprint() {
             const count = document.getElementById('chapterCount').value;
             const totalMarks = document.getElementById('totalMarks').value;
+
+            if (!validateInputs(count, totalMarks)) {
+                return;
+            }
 
             let totalTime = 0;
             let totalImportance = 0;
@@ -136,7 +188,7 @@
             document.getElementById('result').innerHTML = resultHTML;
         }
 
-        // ✅ Download the blueprint as a PDF
+        // ✅ Download as PDF
         function downloadPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
