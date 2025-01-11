@@ -102,6 +102,8 @@
                 return false;
             }
 
+            let totalImportance = 0;
+
             for (let i = 1; i <= count; i++) {
                 const title = document.getElementById(`title${i}`).value.trim();
                 const time = parseFloat(document.getElementById(`time${i}`).value);
@@ -119,7 +121,16 @@
                     showError(`Importance weight for Chapter ${i} must be between 1 and 100.`);
                     return false;
                 }
+
+                totalImportance += importance; // ✅ Add to total importance
             }
+
+            // ✅ Check if the total importance weight adds up to 100%
+            if (totalImportance !== 100) {
+                showError(`The total importance weight must add up to 100%. It currently adds up to ${totalImportance}%.`);
+                return false;
+            }
+
             clearError();
             return true;
         }
@@ -188,7 +199,7 @@
             document.getElementById('result').innerHTML = resultHTML;
         }
 
-        // ✅ Download as PDF
+        // ✅ Download the blueprint as a PDF
         function downloadPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
