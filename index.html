@@ -44,6 +44,11 @@
             padding: 10px;
             border: 1px solid #ccc;
         }
+        .description {
+            font-size: 12px;
+            color: #555;
+            margin-bottom: 10px;
+        }
         .error {
             color: red;
             font-size: 14px;
@@ -57,12 +62,21 @@
     <h1>Exam Blueprint Generator</h1>
 
     <form id="blueprintForm">
-        <label>Number of Chapters: </label>
+        <!-- 1. Number of Chapters -->
+        <label>Number of Chapters:</label><br>
         <input type="number" id="chapterCount" min="1" required><br>
+        <div class="description">*Enter the total number of chapters or topics to be included in the exam.*</div>
+
+        <!-- 6. Generate Inputs Button -->
         <button type="button" onclick="generateInputs()">Generate Inputs</button>
+        
         <div id="inputs"></div>
-        <label>Total Exam Marks: </label>
+
+        <!-- 5. Total Exam Marks -->
+        <label>Total Exam Marks:</label><br>
         <input type="number" id="totalMarks" min="1" required><br>
+        <div class="description">*Enter the total marks allocated for the entire exam (e.g., 100 or 50).*</div>
+
         <button type="button" onclick="generateBlueprint()">Generate Blueprint</button>
     </form>
 
@@ -83,9 +97,18 @@
             for (let i = 1; i <= count; i++) {
                 inputsDiv.innerHTML += `
                     <h3>Chapter ${i}</h3>
+
+                    <!-- 2. Chapter Title -->
                     <input type="text" placeholder="Chapter Title" id="title${i}" required><br>
+                    <div class="description">*Provide the name or main topic of this chapter.*</div>
+
+                    <!-- 3. Time Spent (hrs) -->
                     <input type="number" placeholder="Time Spent (hrs)" id="time${i}" min="1" required><br>
+                    <div class="description">*Enter the total hours spent covering this chapter in lectures.*</div>
+
+                    <!-- 4. Importance Weight (%) -->
                     <input type="number" placeholder="Importance Weight (%)" id="importance${i}" min="1" max="100" required><br>
+                    <div class="description">*Assign a percentage for the chapter's exam importance (total must be 100%).*</div>
                 `;
             }
         }
@@ -135,114 +158,32 @@
             return true;
         }
 
-        // ✅ Function to Show Error Messages
+        // ✅ Error Message Handling
         function showError(message) {
             document.getElementById('errorMessage').innerText = message;
         }
 
-        // ✅ Clear Error Messages
         function clearError() {
             document.getElementById('errorMessage').innerText = "";
         }
 
-        // ✅ Generate the exam blueprint
-        function generateBlueprint() {
-            const count = document.getElementById('chapterCount').value;
-            const totalMarks = document.getElementById('totalMarks').value;
+        // ✅ Download the blueprint as a PDF
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
 
-            if (!validateInputs(count, totalMarks)) {
+            const resultDiv = document.getElementById('result');
+            if (!resultDiv.innerHTML.trim()) {
+                alert('Please generate the blueprint first!');
                 return;
             }
 
-            let totalTime = 0;
-            let totalImportance = 0;
-
-            const chapters = [];
-
-            for (let i = 1; i <= count; i++) {
-                const title = document.getElementById(`title${i}`).value;
-                const time = parseFloat(document.getElementById(`time${i}`).value);
-                const importance = parseFloat(document.getElementById(`importance${i}`).value);
-
-                totalTime += time;
-                totalImportance += importance;
-
-                chapters.push({ title, time, importance });
-            }
-
-            let resultHTML = `<h2>Generated Exam Blueprint</h2>
-            <table>
-                <tr>
-                    <th>Chapter</th>
-                    <th>Time Weight (%)</th>
-                    <th>Importance Weight (%)</th>
-                    <th>Final Weight (%)</th>
-                    <th>Marks Allocated</th>
-                </tr>`;
-
-            chapters.forEach(chapter => {
-                const timeWeight = (chapter.time / totalTime) * 100;
-                const finalWeight = (timeWeight + chapter.importance) / 2;
-                const marks = ((finalWeight / 100) * totalMarks).toFixed(2);
-
-                resultHTML += `
-                    <tr>
-                        <td>${chapter.title}</td>
-                        <td>${timeWeight.toFixed(2)}%</td>
-                        <td>${chapter.importance}%</td>
-                        <td>${finalWeight.toFixed(2)}%</td>
-                        <td>${marks}</td>
-                    </tr>`;
+            html2canvas(resultDiv).then(function (canvas) {
+                const imgData = canvas.toDataURL('image/png');
+                doc.addImage(imgData, 'PNG', 10, 10, 190, 0);
+                doc.save('Exam_Blueprint.pdf');
             });
-
-            resultHTML += `</table>`;
-            document.getElementById('result').innerHTML = resultHTML;
         }
-
-        // ✅ Download the blueprint as a PDF
-       function downloadPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('p', 'mm', 'a4');
-
-    const resultDiv = document.getElementById('result');
-    if (!resultDiv.innerHTML.trim()) {
-        alert('Please generate the blueprint first!');
-        return;
-    }
-
-    // ✅ Header Section
-    doc.setFontSize(20);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Exam Blueprint', 105, 20, { align: 'center' });
-
-    // ✅ Subheader (Date or Institution)
-    const today = new Date().toLocaleDateString();
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Generated on: ${today}`, 105, 28, { align: 'center' });
-
-    // ✅ Optional Logo (Add your logo URL)
-    const logoUrl = 'https://via.placeholder.com/80'; // Replace with your logo URL
-    doc.addImage(logoUrl, 'PNG', 15, 10, 20, 20); // Position: (x, y, width, height)
-
-    // ✅ Convert the Table to PDF
-    html2canvas(resultDiv).then(function (canvas) {
-        const imgData = canvas.toDataURL('image/png');
-        doc.addImage(imgData, 'PNG', 10, 40, 190, 0);
-
-        // ✅ Footer with Page Number
-        const pageCount = doc.internal.getNumberOfPages();
-        for (let i = 1; i <= pageCount; i++) {
-            doc.setPage(i);
-            doc.setFontSize(10);
-            doc.text(`Page ${i} of ${pageCount}`, 105, 290, { align: 'center' });
-        }
-
-        // ✅ Save the PDF
-        doc.save('Custom_Exam_Blueprint.pdf');
-    });
-}
-
     </script>
 
 </body>
