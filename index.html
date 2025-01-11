@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Blueprint Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            text-align: center;
+            padding: 20px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            width: 250px;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Exam Blueprint Generator</h1>
+
+    <form id="blueprintForm">
+        <label>Number of Chapters: </label>
+        <input type="number" id="chapterCount" min="1" required><br>
+        <button type="button" onclick="generateInputs()">Generate Inputs</button>
+        <div id="inputs"></div>
+        <label>Total Exam Marks: </label>
+        <input type="number" id="totalMarks" required><br>
+        <button type="button" onclick="generateBlueprint()">Generate Blueprint</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        function generateInputs() {
+            const count = document.getElementById('chapterCount').value;
+            const inputsDiv = document.getElementById('inputs');
+            inputsDiv.innerHTML = '';
+
+            for (let i = 1; i <= count; i++) {
+                inputsDiv.innerHTML += `
+                    <h3>Chapter ${i}</h3>
+                    <input type="text" placeholder="Chapter Title" id="title${i}" required><br>
+                    <input type="number" placeholder="Time Spent (hrs)" id="time${i}" min="1" required><br>
+                    <input type="number" placeholder="Importance Weight (%)" id="importance${i}" min="1" max="100" required><br>
+                `;
+            }
+        }
+
+        function generateBlueprint() {
+            const count = document.getElementById('chapterCount').value;
+            const totalMarks = document.getElementById('totalMarks').value;
+
+            let totalTime = 0;
+            let totalImportance = 0;
+
+            const chapters = [];
+
+            for (let i = 1; i <= count; i++) {
+                const title = document.getElementById(`title${i}`).value;
+                const time = parseFloat(document.getElementById(`time${i}`).value);
+                const importance = parseFloat(document.getElementById(`importance${i}`).value);
+
+                totalTime += time;
+                totalImportance += importance;
+
+                chapters.push({ title, time, importance });
+            }
+
+            let resultHTML = `<h2>Generated Exam Blueprint</h2>
+            <table>
+                <tr>
+                    <th>Chapter</th>
+                    <th>Time Weight (%)</th>
+                    <th>Importance Weight (%)</th>
+                    <th>Final Weight (%)</th>
+                    <th>Marks Allocated</th>
+                </tr>`;
+
+            chapters.forEach(chapter => {
+                const timeWeight = (chapter.time / totalTime) * 100;
+                const finalWeight = (timeWeight + chapter.importance) / 2;
+                const marks = ((finalWeight / 100) * totalMarks).toFixed(2);
+
+                resultHTML += `
+                    <tr>
+                        <td>${chapter.title}</td>
+                        <td>${timeWeight.toFixed(2)}%</td>
+                        <td>${chapter.importance}%</td>
+                        <td>${finalWeight.toFixed(2)}%</td>
+                        <td>${marks}</td>
+                    </tr>`;
+            });
+
+            resultHTML += `</table>`;
+            document.getElementById('result').innerHTML = resultHTML;
+        }
+    </script>
+
+</body>
+</html>
